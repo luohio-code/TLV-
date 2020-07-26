@@ -20,9 +20,12 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
+#include "tlv_pack.h"
+
+
 #define SERVER_IP          "127.0.0.1"
 #define SERVER_PORT        8889
-#define MSG_STR            "Hello, Unix Network Program World!"
+
 
 int main(int argc, char **argv)
 {
@@ -30,7 +33,14 @@ int main(int argc, char **argv)
     int                     rv = -1;
     char                    buf[1024]; 
     struct sockaddr_in      serv_addr;
+    tlv_send_data           tlv_data;
+    
 
+    //TLV打包
+    pack_sn(tlv_data.sn, sizeof(tlv_data.sn));
+    pack_temp(tlv_data.temp, sizeof(tlv_data.temp));
+    pack_time (tlv_data.datatime, sizeof(tlv_data.datatime));
+    
     conn_fd = socket(AF_INET, SOCK_STREAM, 0);
     if(conn_fd < 0)
     {
@@ -49,7 +59,7 @@ int main(int argc, char **argv)
         return 0;
     }
 
-    if( write(conn_fd, MSG_STR, strlen(MSG_STR)) < 0 )
+    if( write(conn_fd, &tlv_data, 30) < 0 )
     {
         printf("Write data to server [%s:%d] failure: %s\n", SERVER_IP, SERVER_PORT, strerror(errno));
         goto cleanup;
